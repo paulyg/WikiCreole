@@ -1,27 +1,63 @@
 <?php
 /**
+ * Converts WikiCreole, universal wiki markup, into HTML.
+ *
  * @package WikiCreole
  * @author Paul Garvin <paul@paulgarvin.net>
- * @copyright Copyright 2010, 2011 Paul Garvin. All rights reserved.
- * @license http://www.gnu.org/licenses/gpl-3.0-standalone.html GNU General Public License v3
+ * @copyright Copyright 2011 Paul Garvin.
+ * @license MIT License
  *
- * This file is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2011 Paul Garvin <paul@paulgarvin.net>
  *
- * This file is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU General Public License
- * along with this file. If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
  */
 
 /**
  * Converts WikiCreole, universal wiki markup, into HTML.
+ *
+ * Usage:
+ * <code>
+ $parser = new WikiCreole($base_url_for_wiki_links, $base_url_for_images, $list_of_existing_page_slugs);
+ * echo $parser->parse($wiki_markup);
+ * </code>
+ * The $base_url_for_wiki_links and $base_url_for_images are required, but can be
+ * relative (path only) or absolute (scheme & host).
+ *
+ * $list_of_existing_page_slugs is optional. The keys of the array must be just the URL slug
+ * for a page after any illegal characters have stripped and formatting been applied (i.e.
+ * spaces to dashes). See {@link linkCallback, $url_special_chars} for more info on the URL
+ * formatting. If this array is provided a class of `notcreated` is given to the link and
+ * a title of `This wiki page does not exist yet. Click to create it.` The class and title
+ * may be configurable in future versions. If no array is passed no class or title is given
+ * to the link.
+ *
+ * A class of `external` is given to external (not wiki) links. This may be configurable
+ * in future versions.
+ *
+ * Known issues:
+ * - Multi-line list items do not work.
+ * - Putting }}} inside a no wiki tag will trip up the parser.
+ * - Macro/placeholders are not implemented.
+ * - Otherwise everything in the Creole 1.0 spec works.
+ *
  * @package WikiCreole
+ * @link http://www.wikicreole.org/
  * @todo Make multiline list items work
  * @todo Implement Placeholder/Macro <<<x>>>
  * @todo Solve embeding }}} in nowiki tags
@@ -39,6 +75,13 @@ class WikiCreole
 	 * @var string
 	 */
 	const URL_REGEX = '(?:(https?|ftps?|sftp|news|mailto|irc|cvs|svn|git|bzr)://|[a-zA-Z0-9.\-]+\.[a-z]{2,4}\/)(?:[^\s{}<>"`]+)+(?:\(([^\s{}<>"`])*\)|[^\s`!?.()\[\]{};:\'",<>])';
+
+	/**
+	 * Characters that should be replaced in URL slugs.
+	 * @var array
+	 */
+	protected $url_special_chars = array('`', '#', '%', '^', '&', '*', '=', '[', ']',
+									 	 '{', '}', '|', '\\', '\'', '"', '<', '>', '/', '?');
 
 	/**
 	 * Collection of all block type nowiki elements found in markup.
@@ -181,10 +224,16 @@ class WikiCreole
 				continue;
 			}
 			$str = trim($str);
-			$len = strlen($str) - 1;
-			if ((($str[0] == '<') && ($str[$len] == '>')) ||
-				(($str[0] == '@') && ($str[$len] == '@'))) {
+			$last = strlen($str) - 1;
+			if ((($str[0] == '<') && ($str[$last] == '>')) ||
+				(($str[0] == '@') && ($str[$last] == '@'))) {
 				continue;
+
+			// Catch img tags but don't put them inside p tags.
+			} elseif (($str[0] == '{' && $str[1] == '{') &&
+					  ($str[$last - 1] == '}' && $str[$last] == '}')) {
+				$fragments[$idx] = $this->parseInline($str);
+
 			} else {
 				$fragments[$idx] = '<p>' . $this->parseInline($str) . '</p>';
 			}
@@ -394,6 +443,7 @@ class WikiCreole
 		$buffer = "<table>\n";
 		foreach ($rows as $row) {
 			$buffer .= "<tr>\n";
+			$row = trim($row);
 			$row = trim($row, '|');
 			$cells = explode('|', $row);
 			foreach ($cells as $idx => $cell) {
@@ -640,7 +690,7 @@ class WikiCreole
 		} else {
 			$url = htmlspecialchars_decode($url, ENT_QUOTES);
 			$url = str_replace(' ', '-', $url);
-			$url = str_replace('`%^&*=[]{}\\|;\'",<>?/', '', $url);
+			$url = str_replace($this->url_special_chars, '', $url);
 			$page = $url;
 			$url = $this->urlBase . $page;
 			if ($this->wikiPageExists($page)) {

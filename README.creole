@@ -1,0 +1,46 @@
+ =A Wiki Creole Parser in PHP=
+ 
+Creole is a standardized specification for wiki markup that attempts to be as univerasal as possible across all of the different wiki markup syntaxes out there. The 1.0 //stable// version of the specification was released in 2008. You can find out more about Creole, including syntax cheat sheets and the history behind the project at the website http://wikiceole.org.
+
+The intent of this libary is to allow it's use in any CMS, wiki, blog, etc software that want to allow users to enter content in Creole markup instead of raw HTML. The library is implemented as a single class. An MIT license allows it's reuse in just about any type of software.
+
+==Motivation==
+I wrote this class/library because I want to use Creole markup in a CMS I am writing. I find the syntax to be the most natural and intuitive wiki syntax out there. I began using Creole syntax inside of [[http://www.tiddlywiki.com/TiddlyWiki]]. Since I am used to it and like it I don't have the motivation to pick up the Markdown synstax that is so popular these days. There seems to be two other general purpose Creole parsers in PHP, Pear_Text_Wiki and the little known ezcDocumentCreoleWiki. At the time I wrote most of this library I only knew about Pear_Text_Wiki and decided to write my own that used PHP5 class structure and did not depend on PEAR. 
+
+==Requirements==
+* PHP 5.2.4 or greater (I use [[http://php.net/manual/en/function.htmlspecialchars.php|htmlspecialchar]]'s fourth $double_encode argument to keep &gt; from turning into &amp;gt;).
+* PCRE enabled (it usually is)
+
+ ==Usage=
+{{{
+$parser = new WikiCreole($base_url_for_wiki_links, $base_url_for_images, $list_of_existing_page_slugs);
+echo $parser->parse($wiki_markup);
+}}}
+
+The class requires two settings to be passed in it's constructor:
+ * $base_url_for_wiki_links - a URL string that will be prepended to any //wiki links// (links to other pages on the wiki/CMS/blog/etc, not outside links)
+ * $base_url_for_images - a URL string that will be prepended to any //wiki images// (links to other pages on the wiki/CMS/blog/etc, not outside images)
+
+The $base_url_for_wiki_links and $base_url_for_images can be relative (path only) or absolute (scheme & host). An empty string is valid if you want completely relative URLs.
+
+A third constructor argument $list_of_existing_page_slugs accepts a array containing a list of existing pages. The values of the array (keys are ignored) must be just the URL slug for a page after any illegal characters have stripped and formatting been applied (i.e. spaces to dashes). See the {{{linkCallback()}}} method and {{{$url_special_chars}}} property for more info on the URL formatting. I realize different software packages may have different rules for URL formatting/preparation. This is something that may become pluggable in the future.
+ 
+If the $list_of_existing_page_slugs array is provided a class of {{{notcreated}}} is given to the <a> tag and a title of //This wiki page does not exist yet. Click to create it.// applied. The class and title may be configurable in future versions. If no array is passed no class or title is given to the link.
+
+A class of {{{external}}} is given to external (not wiki) links. This may also be configurable in future versions.
+
+==Known issues==
+* Multi-line list items do not work.
+* Putting }}} inside a no wiki tag will trip up the parser.
+* Macro/placeholders are not implemented.
+
+Otherwise everything in the Creole 1.0 spec works.
+
+==Extensions to Creole==
+I like to use strikethrough so I added {{{--strikethrough--}}} and also {{{__underline__}}} as markup formats. The rendered HTML uses a <span> tag with style applied to be compatable with HTML4/XHTML1 Strict. Note however that <s> and <u> are valid HTML5 tags.
+
+==Plans for the future==
+* Fix the stuff in known issues.
+* Provide more control over the HTML classes that are added to links.
+* Possibly make the entire //wiki link// conversion process pluggable (a closure would be great here if using PHP 5.3).
+

@@ -1,6 +1,6 @@
 <?php
 /**
- * Converts WikiCreole, universal wiki markup, into HTML.
+ * A library to convert Creole, a common & standardized wiki markup, into HTML.
  *
  * @package WikiCreole
  * @author Paul Garvin <paul@paulgarvin.net>
@@ -29,7 +29,7 @@
  */
 
 /**
- * Converts WikiCreole, universal wiki markup, into HTML.
+ * Converts Creole, a common & standardized wiki markup, into HTML.
  *
  * Usage:
  * <code>
@@ -158,8 +158,6 @@ class WikiCreole
 		$this->lists = array();
 		$this->tables = array();
 		$this->headings = array();
-		$this->images = array();
-		$this->links = array();
 	}
 
 	public function parse($markup)

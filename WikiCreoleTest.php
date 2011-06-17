@@ -2,7 +2,7 @@
 /**
  * Unit tests for the WikiCreole class.
  *
- * Converts WikiCreole universal wiki markup into HTML.
+ * WikiCreole is a library to convert Creole, a common & standardized wiki markup, into HTML.
  *
  * @package WikiCreole
  * @author Paul Garvin <paul@paulgarvin.net>

@@ -2,10 +2,10 @@
  
 Creole is a standardized specification for wiki markup that attempts to be as univerasal as possible across all of the different wiki markup syntaxes out there. The 1.0 //stable// version of the specification was released in 2008. You can find out more about Creole, including syntax cheat sheets and the history behind the project at the website http://wikiceole.org.
 
-The intent of this libary is to allow it's use in any CMS, wiki, blog, etc software that want to allow users to enter content in Creole markup instead of raw HTML. The library is implemented as a single class. An MIT license allows it's reuse in just about any type of software.
+The intent of this library is to allow it's use in any CMS, wiki, blog, etc software that want to allow users to enter content in Creole markup instead of raw HTML. The library is implemented as a single class. An MIT license allows it's reuse in just about any type of software.
 
 ==Motivation==
-I wrote this class/library because I want to use Creole markup in a CMS I am writing. I find the syntax to be the most natural and intuitive wiki syntax out there. I began using Creole syntax inside of [[http://www.tiddlywiki.com/TiddlyWiki]]. Since I am used to it and like it I don't have the motivation to pick up the Markdown synstax that is so popular these days. There seems to be two other general purpose Creole parsers in PHP, Pear_Text_Wiki and the little known ezcDocumentCreoleWiki. At the time I wrote most of this library I only knew about Pear_Text_Wiki and decided to write my own that used PHP5 class structure and did not depend on PEAR. 
+I wrote this class/library because I want to use Creole markup in a CMS I am writing. I find the syntax to be the most natural and intuitive wiki syntax out there. I began using Creole syntax inside of [[http://www.tiddlywiki.com|TiddlyWiki]]. Since I am used to it and like it I don't have the motivation to pick up the Markdown syntax that is so popular these days. There seems to be two other general purpose Creole parsers in PHP, Pear_Text_Wiki and the little known ezcDocumentCreoleWiki. At the time I wrote most of this library I only knew about Pear_Text_Wiki and decided to write my own that used PHP5 class structure and did not depend on PEAR. 
 
 ==Requirements==
 * PHP 5.2.4 or greater (I use [[http://php.net/manual/en/function.htmlspecialchars.php|htmlspecialchar]]'s fourth $double_encode argument to keep &gt; from turning into &amp;gt;).
@@ -37,7 +37,7 @@ A class of {{{external}}} is given to external (not wiki) links. This may also b
 Otherwise everything in the Creole 1.0 spec works.
 
 ==Extensions to Creole==
-I like to use strikethrough so I added {{{--strikethrough--}}} and also {{{__underline__}}} as markup formats. The rendered HTML uses a <span> tag with style applied to be compatable with HTML4/XHTML1 Strict. Note however that <s> and <u> are valid HTML5 tags.
+I like to use strikethrough so I added {{{--strikethrough--}}} and also {{{__underline__}}} as markup formats. The rendered HTML uses a <span> tag with style applied to be compatible with HTML4/XHTML1 Strict. Note however that <s> and <u> are valid HTML5 tags.
 
 ==Plans for the future==
 * Fix the stuff in known issues.

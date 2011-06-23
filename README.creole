@@ -13,6 +13,7 @@ I wrote this class/library because I want to use Creole markup in a CMS I am wri
 
  ==Usage=
 {{{
+include 'WikiParser.php';
 $parser = new WikiCreole($base_url_for_wiki_links, $base_url_for_images, $list_of_existing_page_slugs);
 echo $parser->parse($wiki_markup);
 }}}

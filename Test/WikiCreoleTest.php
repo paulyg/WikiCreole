@@ -30,7 +30,7 @@
  * IN THE SOFTWARE.
  */
 
-require_once __DIR__ . '/WikiCreole.php';
+require_once basename(__DIR__) . '/WikiCreole.php';
 
 /**
  * Test class for WikiCreole.
@@ -83,9 +83,9 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
      */
     public function testPreformat()
     {
-		$input = "Testing. \r\nAnother line.\r\n   \r\nParagraph 2\r We only want to see one &amp; and < and \" encoded\r\n";
-		$expected = "Testing. \nAnother line.\n\nParagraph 2 We only want to see one &amp; and &lt; and &quot; encoded\n";
-		$output = $this->object->preformat($input);
+        $input = "Testing. \r\nAnother line.\r\n   \r\nParagraph 2\r We only want to see one &amp; and < and \" encoded\r\n";
+        $expected = "Testing. \nAnother line.\n\nParagraph 2 We only want to see one &amp; and &lt; and &quot; encoded\n";
+        $output = $this->object->preformat($input);
     }
 
     /**
@@ -101,82 +101,82 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers WikiCreoleParser::matchNowikiBlocks
-	 * @covers WikiCreoleParser::nowikiBlockCallback
+     * @covers WikiCreoleParser::nowikiBlockCallback
      */
     public function testNowikiBlocks()
     {
-		$input = "A paragraph.\n\n{{{\nSome text. some(\$code); \n//Some bold//\n}}}\n\nAnother paragraph.";
-		$expected = "<p>A paragraph.</p>\n<pre>\nSome text. some(\$code); \n//Some bold//\n</pre>\n<p>Another paragraph.</p>";
+        $input = "A paragraph.\n\n{{{\nSome text. some(\$code); \n//Some bold//\n}}}\n\nAnother paragraph.";
+        $expected = "<p>A paragraph.</p>\n<pre>\nSome text. some(\$code); \n//Some bold//\n</pre>\n<p>Another paragraph.</p>";
         $output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchNowikiInline
-	 * @covers WikiCreoleParser::nowikiInlineCallback
+     * @covers WikiCreoleParser::nowikiInlineCallback
      */
     public function testNowikiInline()
     {
-		$input = 'Here is some inline text. {{{This should **be escaped**.}}}';
-		$expected = '<p>Here is some inline text. <tt>This should **be escaped**.</tt></p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $input = 'Here is some inline text. {{{This should **be escaped**.}}}';
+        $expected = '<p>Here is some inline text. <tt>This should **be escaped**.</tt></p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLists
-	 * @covers WikiCreoleParser::listCallback
+     * @covers WikiCreoleParser::listCallback
      */
     public function testSimpleUnorderedList()
     {
         $input = "* Alpha\n* Beta\n* Gamma\n* Delta";
-		$expected = "<ul>\n<li>Alpha</li>\n<li>Beta</li>\n<li>Gamma</li>\n<li>Delta</li>\n</ul>\n";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<ul>\n<li>Alpha</li>\n<li>Beta</li>\n<li>Gamma</li>\n<li>Delta</li>\n</ul>\n";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLists
-	 * @covers WikiCreoleParser::listCallback
+     * @covers WikiCreoleParser::listCallback
      */
     public function testSimpleOrderedList()
     {
         $input = "# One\n# Two\n# Three\n# Four";
-		$expected = "<ol>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ol>\n";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<ol>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ol>\n";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLists
-	 * @covers WikiCreoleParser::listCallback
+     * @covers WikiCreoleParser::listCallback
      */
     public function testOrderedListFunkyWhitespace()
     {
         $input = " #One\n # Two\n #Three\n# Four";
-		$expected = "<ol>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ol>\n";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<ol>\n<li>One</li>\n<li>Two</li>\n<li>Three</li>\n<li>Four</li>\n</ol>\n";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLists
-	 * @covers WikiCreoleParser::listCallback
+     * @covers WikiCreoleParser::listCallback
      */
     public function testSimpleNestedUl()
     {
         $input = "* Item 1\n** Item 1.1\n* Item 2";
-		$expected = "<ul>\n<li>Item 1\n<ul>\n<li>Item 1.1</li>\n</ul>\n</li>\n<li>Item 2</li>\n</ul>\n";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<ul>\n<li>Item 1\n<ul>\n<li>Item 1.1</li>\n</ul>\n</li>\n<li>Item 2</li>\n</ul>\n";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
-	/**
-	 * @todo Implement testComplicatedNestedList().
-	 */
-	public function testComplicatedNestedList()
-	{
-		$input = <<<'EoWiki'
+    /**
+     * @todo Implement testComplicatedNestedList().
+     */
+    public function testComplicatedNestedList()
+    {
+        $input = <<<'EoWiki'
 * FrontendController
 ## Does URL exist in //pages// table?
 ## Yes - what type is it?
@@ -222,7 +222,7 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
 ## Register view helpers
 *** Tm_ViewAbstract::registerHelper() or Tm_Helper_Abstract::register()
 EoWiki;
-		$expected = <<<'EoHtml'
+        $expected = <<<'EoHtml'
 <ul>
 <li>FrontendController
 <ol>
@@ -298,9 +298,9 @@ EoWiki;
 </ul>
 
 EoHtml;
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
     /**
      * @covers WikiCreoleParser::matchTables
@@ -308,13 +308,13 @@ EoHtml;
      */
     public function testSimpleTable()
     {
-		$input = <<<'EoWiki'
+        $input = <<<'EoWiki'
 |Irene|Paul|
 |Wife|Husband|
 |28|34|
 |IT|Engineer|
 EoWiki;
-		$expected = <<<'EoHTML'
+        $expected = <<<'EoHTML'
 <table>
 <tr>
 <td>Irene</td>
@@ -335,8 +335,8 @@ EoWiki;
 </table>
 
 EoHTML;
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
@@ -345,12 +345,12 @@ EoHTML;
      */
     public function testTableHorizontalHeader()
     {
- 		$input = <<<'EoWiki'
+        $input = <<<'EoWiki'
 |=Name|=Relationship|=Age|=Occupation|
 |Irene|Wife|28|IT|
 |Paul|Husband|34|Engineer|
 EoWiki;
-		$expected = <<<'EoHTML'
+        $expected = <<<'EoHTML'
 <table>
 <tr>
 <th>Name</th>
@@ -373,8 +373,8 @@ EoWiki;
 </table>
 
 EoHTML;
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
@@ -383,13 +383,13 @@ EoHTML;
      */
     public function testTableVerticalHeader()
     {
- 		$input = <<<'EoWiki'
+        $input = <<<'EoWiki'
 |=Name|Irene|Paul|
 |=Relationship|Wife|Husband|
 |=Age|28|34|
 |=Occupation|IT|Engineer|
 EoWiki;
-		$expected = <<<'EoHTML'
+        $expected = <<<'EoHTML'
 <table>
 <tr>
 <th>Name</th>
@@ -414,8 +414,8 @@ EoWiki;
 </table>
 
 EoHTML;
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
@@ -442,19 +442,19 @@ EoHTML;
         );
     }
 
-	/**
-	 *
-	 */
-	public function testMarkupInTables()
-	{
-		$input = <<<'EoWiki'
+    /**
+     *
+     */
+    public function testMarkupInTables()
+    {
+        $input = <<<'EoWiki'
 |=Directory|=Software Package|=Installed Version|=Current Version|
 |blog|[[http://wordpress.org|Wordpress]]|3.0.5|3.0.5|
 |forum|phpBB|3.0.5|**3.0.7pl1**|
 |gallery2|[[Gallery|Menalto Gallery]]|2.3.3|//3.0//|
 |kitchen|[[Wordpress]]|3.0.5|3.0.5|
 EoWiki;
-		$expected = <<<'EoHtml'
+        $expected = <<<'EoHtml'
 <table>
 <tr>
 <th>Directory</th>
@@ -489,75 +489,75 @@ EoWiki;
 </table>
 
 EoHtml;
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
     /**
      * @covers WikiCreoleParser::matchHeadings
-	 * @covers WikiCreoleParser::headingCallback
+     * @covers WikiCreoleParser::headingCallback
      */
     public function testHeadingsH1()
     {
         $input = "=This is the page title.=";
-		$expected = "<h1>This is the page title.</h1>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<h1>This is the page title.</h1>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchHeadings
-	 * @covers WikiCreoleParser::headingCallback
+     * @covers WikiCreoleParser::headingCallback
      */
     public function testHeadingsH3()
     {
         $input = "===This is a sub-section heading.===";
-		$expected = "<h3>This is a sub-section heading.</h3>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<h3>This is a sub-section heading.</h3>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchHeadings
-	 * @covers WikiCreoleParser::headingCallback
+     * @covers WikiCreoleParser::headingCallback
      */
     public function testHeadingsLeadingWhitespace()
     {
         $input = " ==This is still a heading despite of the leading space.==";
-		$expected = "<h2>This is still a heading despite of the leading space.</h2>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<h2>This is still a heading despite of the leading space.</h2>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
-	public function testNoBoldOrItalicInHeadings()
-	{
-		$input = "==This is an H2. **Maybe this is bold?** No. //How about italic?// No.==";
-		$expected = "<h2>This is an H2. **Maybe this is bold?** No. //How about italic?// No.</h2>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+    public function testNoBoldOrItalicInHeadings()
+    {
+        $input = "==This is an H2. **Maybe this is bold?** No. //How about italic?// No.==";
+        $expected = "<h2>This is an H2. **Maybe this is bold?** No. //How about italic?// No.</h2>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
-	/**
+    /**
      * @covers WikiCreoleParser::matchHeadings
-	 * @covers WikiCreoleParser::headingCallback
-	 */
-	public function testHeadingsNoClosingTags()
-	{
+     * @covers WikiCreoleParser::headingCallback
+     */
+    public function testHeadingsNoClosingTags()
+    {
         $input = "==This should still be rendered as a heading without the trailing tags.";
-		$expected = "<h2>This should still be rendered as a heading without the trailing tags.</h2>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+        $expected = "<h2>This should still be rendered as a heading without the trailing tags.</h2>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
     /**
      * @covers WikiCreoleParser::matchHorizontalRules
      */
     public function testMatchHorizontalRules()
     {
-		$input = "La-de-da this is some sample text.\n----\nThis is a new section.";
-		$expected = "<p>La-de-da this is some sample text.</p>\n<hr />\n<p>This is a new section.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $input = "La-de-da this is some sample text.\n----\nThis is a new section.";
+        $expected = "<p>La-de-da this is some sample text.</p>\n<hr />\n<p>This is a new section.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
@@ -566,55 +566,55 @@ EoHtml;
      */
     public function testBold()
     {
-		$input = 'Here is some text. **This is bold!** This is not.';
-		$expected = '<p>Here is some text. <strong>This is bold!</strong> This is not.</p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+        $input = 'Here is some text. **This is bold!** This is not.';
+        $expected = '<p>Here is some text. <strong>This is bold!</strong> This is not.</p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
-	public function testMultilineBold()
-	{
-		$input = "Here is some text. **This is bold!\nThis is still bold.** This is not.";
-		$expected = "<p>Here is some text. <strong>This is bold!\nThis is still bold.</strong> This is not.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+    public function testMultilineBold()
+    {
+        $input = "Here is some text. **This is bold!\nThis is still bold.** This is not.";
+        $expected = "<p>Here is some text. <strong>This is bold!\nThis is still bold.</strong> This is not.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
     /**
      * @covers WikiCreoleParser::matchItalic
      * @covers WikiCreoleParser::fontCallback
      */
     public function testMatchItalic()
-	{
-		$input = 'Here is some text. //This is italic!// This is not.';
-		$expected = '<p>Here is some text. <em>This is italic!</em> This is not.</p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+    {
+        $input = 'Here is some text. //This is italic!// This is not.';
+        $expected = '<p>Here is some text. <em>This is italic!</em> This is not.</p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
-	public function testMultilineItalic()
-	{
-		$input = "Here is some text. //This is italic!\nThis should still be italic.// This should not.";
-		$expected = "<p>Here is some text. <em>This is italic!\nThis should still be italic.</em> This should not.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+    public function testMultilineItalic()
+    {
+        $input = "Here is some text. //This is italic!\nThis should still be italic.// This should not.";
+        $expected = "<p>Here is some text. <em>This is italic!\nThis should still be italic.</em> This should not.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
-	public function testBoldItalic()
-	{
-		$input = 'Wow you really **//have to check this out.//** It\'s so cool.';
-		$expected = '<p>Wow you really <strong><em>have to check this out.</em></strong> It&#039;s so cool.</p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+    public function testBoldItalic()
+    {
+        $input = 'Wow you really **//have to check this out.//** It\'s so cool.';
+        $expected = '<p>Wow you really <strong><em>have to check this out.</em></strong> It&#039;s so cool.</p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
-	public function testItalicBold()
-	{
-		$input = 'Wow you really //**have to check this out.**// It\'s so cool.';
-		$expected = '<p>Wow you really <em><strong>have to check this out.</strong></em> It&#039;s so cool.</p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+    public function testItalicBold()
+    {
+        $input = 'Wow you really //**have to check this out.**// It\'s so cool.';
+        $expected = '<p>Wow you really <em><strong>have to check this out.</strong></em> It&#039;s so cool.</p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
     /**
      * @covers WikiCreoleParser::matchStrikethrough
@@ -622,10 +622,10 @@ EoHtml;
      */
     public function testMatchStrikethrough()
     {
-		$input = 'I have a task. --This one is done!-- This one is not.';
-		$expected = '<p>I have a task. <span style="text-decoration: line-through">This one is done!</span> This one is not.</p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $input = 'I have a task. --This one is done!-- This one is not.';
+        $expected = '<p>I have a task. <span style="text-decoration: line-through">This one is done!</span> This one is not.</p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
@@ -634,100 +634,100 @@ EoHtml;
      */
     public function testMatchUnderline()
     {
-		$input = 'Read this. __I really want you to read this!__ I <3 this formatting.';
-		$expected = '<p>Read this. <span style="text-decoration: underline">I really want you to read this!</span> I &lt;3 this formatting.</p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+        $input = 'Read this. __I really want you to read this!__ I <3 this formatting.';
+        $expected = '<p>Read this. <span style="text-decoration: underline">I really want you to read this!</span> I &lt;3 this formatting.</p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
     /**
      * @covers WikiCreoleParser::matchSubAndSup
-	 * @covers WikiCreoleParser::subSupCallback
+     * @covers WikiCreoleParser::subSupCallback
      */
     public function testSub()
     {
         $input = "y = x^^2^^ + 5x + 3 is a quadratic function.";
-		$expected = "<p>y = x<sup>2</sup> + 5x + 3 is a quadratic function.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>y = x<sup>2</sup> + 5x + 3 is a quadratic function.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchSubAndSup
-	 * @covers WikiCreoleParser::subSupCallback
+     * @covers WikiCreoleParser::subSupCallback
      */
     public function testSup()
     {
         $input = "C,,2,,H,,4,, is a hyrdrocarbon more commonly known as Ethylene.";
-		$expected = "<p>C<sub>2</sub>H<sub>4</sub> is a hyrdrocarbon more commonly known as Ethylene.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>C<sub>2</sub>H<sub>4</sub> is a hyrdrocarbon more commonly known as Ethylene.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchImages
-	 * @covers WikiCreoleParser::imgCallback
+     * @covers WikiCreoleParser::imgCallback
      */
     public function testImagesWithAlt()
     {
         $input = "We are going to specify an inline image. {{hawaii.jpg|Beautiful Hawaii}} Isn't it beautiful?";
-		$expected = "<p>We are going to specify an inline image. <img src=\"/wiki/images/hawaii.jpg\" alt=\"Beautiful Hawaii\" /> Isn&#039;t it beautiful?</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>We are going to specify an inline image. <img src=\"/wiki/images/hawaii.jpg\" alt=\"Beautiful Hawaii\" /> Isn&#039;t it beautiful?</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchImages
-	 * @covers WikiCreoleParser::imgCallback
+     * @covers WikiCreoleParser::imgCallback
      */
     public function testImagesNoAlt()
     {
         $input = "Check out our 4th quarter earnings. {{earnings.png}} Look at those sales!";
-		$expected = "<p>Check out our 4th quarter earnings. <img src=\"/wiki/images/earnings.png\" /> Look at those sales!</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>Check out our 4th quarter earnings. <img src=\"/wiki/images/earnings.png\" /> Look at those sales!</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLinkTags
-	 * @covers WikiCreoleParser::linkCallback
+     * @covers WikiCreoleParser::linkCallback
      */
     public function testBareWikiLink()
     {
         $input = "Learn to [[install]] our software.";
-		$expected = "<p>Learn to <a href=\"/wiki/install\">install</a> our software.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>Learn to <a href=\"/wiki/install\">install</a> our software.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLinkTags
-	 * @covers WikiCreoleParser::linkCallback
+     * @covers WikiCreoleParser::linkCallback
      */
     public function testWikiLinkWithText()
     {
         $input = "Learn to use our software by reading [[UserGuide|our User's Guide]].";
-		$expected = "<p>Learn to use our software by reading <a href=\"/wiki/UserGuide\">our User&#039;s Guide</a>.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>Learn to use our software by reading <a href=\"/wiki/UserGuide\">our User&#039;s Guide</a>.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLinkTags
-	 * @covers WikiCreoleParser::linkCallback
+     * @covers WikiCreoleParser::linkCallback
      */
     public function testWikiLinkWithTextFormatting()
     {
         $input = "**Our online [[documentation]] is not so great.**";
-		$expected = "<p><strong>Our online <a href=\"/wiki/documentation\">documentation</a> is not so great.</strong></p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p><strong>Our online <a href=\"/wiki/documentation\">documentation</a> is not so great.</strong></p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @todo Implement testWikiLinkThatDoesntExist().
      * @covers WikiCreoleParser::matchLinkTags
-	 * @covers WikiCreoleParser::linkCallback
+     * @covers WikiCreoleParser::linkCallback
      */
     public function testWikiLinkThatDoesntExist()
     {
@@ -739,71 +739,71 @@ EoHtml;
 
     /**
      * @covers WikiCreoleParser::matchLinkTags
-	 * @covers WikiCreoleParser::linkCallback
+     * @covers WikiCreoleParser::linkCallback
      */
     public function testExternalLink()
     {
         $input = "Check out [[http://www.paulgarvin.net/php]] to learn about my other PHP projects.";
-		$expected = "<p>Check out <a href=\"http://www.paulgarvin.net/php\" class=\"external\">http://www.paulgarvin.net/php</a> to learn about my other PHP projects.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>Check out <a href=\"http://www.paulgarvin.net/php\" class=\"external\">http://www.paulgarvin.net/php</a> to learn about my other PHP projects.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLinkTags
-	 * @covers WikiCreoleParser::linkCallback
+     * @covers WikiCreoleParser::linkCallback
      */
     public function testExternalLinkWithText()
     {
-		$input = "Visit our [[http://www.github.com/wikicreoleparser/|Github repository]] where you can contribute to the project by forking it, improving it, and then making a pull request.";
-		$expected = "<p>Visit our <a href=\"http://www.github.com/wikicreoleparser/\" class=\"external\">Github repository</a> where you can contribute to the project by forking it, improving it, and then making a pull request.</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $input = "Visit our [[http://www.github.com/wikicreoleparser/|Github repository]] where you can contribute to the project by forking it, improving it, and then making a pull request.";
+        $expected = "<p>Visit our <a href=\"http://www.github.com/wikicreoleparser/\" class=\"external\">Github repository</a> where you can contribute to the project by forking it, improving it, and then making a pull request.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
      * @covers WikiCreoleParser::matchLinkTags
-	 * @covers WikiCreoleParser::linkCallback
+     * @covers WikiCreoleParser::linkCallback
      */
     public function testExternalLinkWithTextFormatting()
     {
         $input = "**The [[http://www.php.net/manual/en/|PHP online documentation]] is great.**";
-		$expected = "<p><strong>The <a href=\"http://www.php.net/manual/en/\" class=\"external\">PHP online documentation</a> is great.</strong></p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p><strong>The <a href=\"http://www.php.net/manual/en/\" class=\"external\">PHP online documentation</a> is great.</strong></p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
     /**
-	 * @covers WikiCreoleParser::linkFreeUrls
+     * @covers WikiCreoleParser::linkFreeUrls
      */
     public function testFreeStandingUrls()
     {
         $input = "I wonder who owns http://www.example.org?";
-		$expected = "<p>I wonder who owns <a href=\"http://www.example.org\" class=\"external\">http://www.example.org</a>?</p>";
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
+        $expected = "<p>I wonder who owns <a href=\"http://www.example.org\" class=\"external\">http://www.example.org</a>?</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
     }
 
-	/**
-	 * @covers WikiCreoleParser::parseInline
-	 */
-	public function testForceLinebreak()
-	{
-		$input = 'Elite Technology Services\\\\1234 Main Street\\\\Springfield, PA 19999\\\\123-555-1234';
-		$expected = '<p>Elite Technology Services<br />1234 Main Street<br />Springfield, PA 19999<br />123-555-1234</p>';
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}
+    /**
+     * @covers WikiCreoleParser::parseInline
+     */
+    public function testForceLinebreak()
+    {
+        $input = 'Elite Technology Services\\\\1234 Main Street\\\\Springfield, PA 19999\\\\123-555-1234';
+        $expected = '<p>Elite Technology Services<br />1234 Main Street<br />Springfield, PA 19999<br />123-555-1234</p>';
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
 
-	/**
-	 * A test with all of the parsable elements in one, from the www.wikicreole.org website.
-	 *
-	public function testSmokeTest()
-	{
-		$input = file_get_contents(__DIR__ . '/CreoleTestInput.txt');
-		$expected = file_get_contents(__DIR__ . '/CreoleTestExpected.html');
-		$output = $this->object->parse($input);
-		$this->assertEquals($expected, $output);
-	}	*/
+    /**
+     * A test with all of the parsable elements in one, from the www.wikicreole.org website.
+     *
+    public function testSmokeTest()
+    {
+        $input = file_get_contents(__DIR__ . '/CreoleTestInput.txt');
+        $expected = file_get_contents(__DIR__ . '/CreoleTestExpected.html');
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }   */
 }
 ?>

@@ -41,10 +41,10 @@ $expected = file_get_contents(INPUT_DIR . 'CreoleTestExpected.html');
 $output = $parser->parse($test_input);
 
 file_put_contents(OUTPUT_DIR . 'FinalOutput.html', $output);
-		
+        
 if ($output == $expected) {
-	echo "All tests passed!!" . PHP_EOL;
+    echo "All tests passed!!" . PHP_EOL;
 } else {
-	echo "Some tests failed. :(" . PHP_EOL;
+    echo "Some tests failed. :(" . PHP_EOL;
 }
 

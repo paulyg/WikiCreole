@@ -118,13 +118,57 @@ class WikiCreole
      * Base part of URL to be used for wiki links.
      * @var string
      */
-    protected $urlBase;
+    protected $urlBase = '';
 
     /**
      * Base part of URL to be used for wiki images.
      * @var string
      */
-    protected $imgBase;
+    protected $imgBase = '';
+
+    /**
+     * Format to use when creating external link tags.
+     *
+     * The string must be a valid sprintf format and must have at least two numbered
+     * placeholders: %1$s - The URL, %2$s - The text part of the link.
+     * See {@link linkCallback()} for the default pattern.
+     *
+     * @var array
+     */
+    protected $linkFormatExternal;
+
+    /**
+     * Format to use when creating internal link tags for pages that exist.
+     *
+     * The string must be a valid sprintf format and must have at least two numbered
+     * placeholders: %1$s - The URL, %2$s - The text part of the link.
+     * See {@link linkCallback()} for the default pattern.
+     * 
+     * @var string
+     */
+    protected $linkFormatInternal;
+
+    /**
+     * Format to use when creating internal link tags for pages that do not exist.
+     *
+     * The string must be a valid sprintf format and must have at least two numbered
+     * placeholders: %1$s - The URL, %2$s - The text part of the link.
+     * See {@link linkCallback()} for the default pattern.
+     *
+     * @var string
+     */
+    protected $linkFormatNotExist;
+
+    /**
+     * Format to use when creating link tags for free URLs found in the markup.
+     *
+     * Unlink the other formats this must be a valid preg_replace replacement pattern.
+     * The pattern must have one or more instances of the numbered placeholder `$0`.
+     * See {@link linkFreeUrls()} for the default pattern.
+     *
+     * @var string
+     */
+    protected $linkFormatFree;
 
     /**
      * Collection of existing wiki pages, used to make non-existing page links red.
@@ -133,21 +177,61 @@ class WikiCreole
     protected $existingPages = array();
 
     /**
+     * List of option keys that are publicly accessable.
+     * @var array
+     */
+    protected $optionKeys = array(
+        'imgBase', 'urlBase', 'linkFormatExternal', 'linkFormatInternal',
+        'linkFormatNotExist', 'linkFormatFree'
+    );
+
+    /**
      * Constructor.
-     * @param string $urlBase
-     * @param string $imgBase
+     * @param array $options
      * @param array $pages
      * @return WikiCreole
      */
-    public function __construct($urlBase, $imgBase, $pages = array())
+    public function __construct(array $options, array $pages = array())
     {
-        $this->urlBase = $urlBase;
-        $this->imgBase = $imgBase;
-        if (!empty($pages) && is_array($pages)) {
+        foreach ($options as $name => $value) {
+            $this->setOption($name, $value);
+        }
+
+        if (!empty($pages)) {
             $this->existingPages = $pages;
         }
     }
-    
+
+    /**
+     * Set an option value.
+     * @param string $key Option key.
+     * @param string $value Option value.
+     * @return void
+     * @throws InvalidArgumentException If key in an invalid option.
+     */
+    public function setOption($key, $value)
+    {
+        if (in_array($key, $this->optionKeys)) {
+            $this->$key = $value;
+        } else {
+            throw new InvalidArgumentException("Option key `$key` does not exist.");
+        }
+    }
+
+    /**
+     * Return the value of an option.
+     * @param string $key Option key.
+     * @return string
+     * @throws InvalidArgumentException If key in an invalid option.
+     */
+    public function getOption($key)
+    {
+        if (in_array($key, $this->optionKeys)) {
+            return $this->$key;
+        }
+        throw new InvalidArgumentException("Option key `$key` does not exist.");
+    }
+
     /**
      * Clear out the list of block level elements that are used for parsing to make way for a new run.
      * @return void
@@ -685,7 +769,9 @@ class WikiCreole
             $url = $text = $matches[1];
         }
         if (preg_match('@' . self::URL_REGEX . '@', $url)) {
-            $link = "<a href=\"$url\" class=\"external\">$text</a>";
+            $format = (empty($this->linkFormatExternal)) ?
+                      '<a href="%1$s" class="external">%2$s</a>' :
+                      $this->linkFormatExternal;
         } else {
             $url = htmlspecialchars_decode($url, ENT_QUOTES);
             $url = str_replace(' ', '-', $url);
@@ -693,14 +779,17 @@ class WikiCreole
             $page = $url;
             $url = $this->urlBase . $page;
             if ($this->wikiPageExists($page)) {
-                $link = "<a href=\"$url\">$text</a>";
+                $format = (empty($this->linkFormatInternal)) ?
+                          '<a href="%1$s">%2$s</a>' :
+                          $this->linkFormatInternal;
             } else {
-                $hover = 'This wiki page does not exist yet. Click to create it.';
-                $link = "<a href=\"$url\" class=\"notcreated\" title=\"$hover\">$text</a>";
+                $format = (empty($this->linkFormatNotExist)) ?
+                          '<a href="%1$s" class="notcreated" title="This wiki page does not exist yet. Click to create it.">%2$s</a>' :
+                          $this->linkFormatNotExist;
             }
         }
  
-        return $link;
+        return sprintf($format, $url, $text);
     }
 
     /**
@@ -710,7 +799,10 @@ class WikiCreole
      */
     public function linkFreeUrls($text)
     {
-        $repl = '<a href="$0" class="external">$0</a>';
+        $repl = (empty($this->linkFormatFree)) ?
+                '<a href="$0" class="external">$0</a>' :
+                $this->linkFormatFree;
+
         $text = preg_replace('@(?<= )' . self::URL_REGEX . '@', $repl, $text);
         return $text;
     }
@@ -726,6 +818,6 @@ class WikiCreole
         if (empty($this->existingPages)) {
             return true;
         }
-        return in_array($this->existingPages, $name);
+        return in_array($name, $this->existingPages);
     }
 }

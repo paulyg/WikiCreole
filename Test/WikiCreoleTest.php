@@ -30,7 +30,7 @@
  * IN THE SOFTWARE.
  */
 
-require_once basename(__DIR__) . '/WikiCreole.php';
+require_once dirname(__DIR__) . '/WikiCreole.php';
 
 /**
  * Test class for WikiCreole.
@@ -56,7 +56,9 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->object = new WikiCreole('/wiki/', '/wiki/images/');
+        $this->object = new WikiCreole(array(
+            'urlBase' => '/wiki/',
+            'imgBase' => '/wiki/images/'));
     }
 
     /**

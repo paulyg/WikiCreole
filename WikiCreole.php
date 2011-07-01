@@ -34,22 +34,39 @@
  * Usage:
  * <code>
  * include 'WikiCreole.php';
- * $parser = new WikiCreole($base_url_for_wiki_links, $base_url_for_images, $list_of_existing_page_slugs);
+ * $parser = new WikiCreole(array(
+ *     'urlBase' => '/wiki/',
+ *     'imgBase' => '/media/',
+ *     ),
+ *     $list_of_existing_page_slugs
+ * );
  * echo $parser->parse($wiki_markup);
  * </code>
- * The $base_url_for_wiki_links and $base_url_for_images are required, but can be
- * relative (path only) or absolute (scheme & host).
+ *
+ * All of the options are optional. If you want to use all the defaults pass in an empty
+ * array for the first argument.
+ *
+ * The 'urlBase' will be prepended to any wiki page links. The imgBase will be prepended to
+ * any images. Both options will default to an empty string. If you want absolute URLs pass
+ * in a string with the scheme, host, and base path.
+ *
+ * Four other options keys 'linkFormatExternal', 'linkFormatInternal', 'linkFormatNotExist',
+ * and 'linkFormatFree' are availible and affect how link tags are created.
+ * The first three accept format strings that will be passed to PHP's sprintf function.
+ * The format can use two numbered placeholders: %1$s - The URL, %2$s - The text part of the
+ * link. See {@link linkCallback()} for the default patterns.
+ *
+ * 'linkFormatFree' is applied to URLS which appear in a body of text but are not contained
+ * in a tag. Unlike the above three formats this one is a format string for preg_replace.
+ * There is also only one placeholder, $0, though it can be repeated. See {@link linkFreeUrls}
+ * for the default pattern.
  *
  * $list_of_existing_page_slugs is optional. The keys of the array must be just the URL slug
  * for a page after any illegal characters have stripped and formatting been applied (i.e.
  * spaces to dashes). See {@link linkCallback, $url_special_chars} for more info on the URL
- * formatting. If this array is provided a class of `notcreated` is given to the link and
- * a title of `This wiki page does not exist yet. Click to create it.` The class and title
- * may be configurable in future versions. If no array is passed no class or title is given
- * to the link.
- *
- * A class of `external` is given to external (not wiki) links. This may be configurable
- * in future versions.
+ * formatting. If this array is provided and the page is not in the array the
+ * 'linkFormatNotExist' format is used to generate the link tag. Otherwise the
+ * 'linkFormatInternal' is used.
  *
  * Known issues:
  * - Multi-line list items do not work.

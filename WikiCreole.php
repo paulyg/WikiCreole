@@ -182,7 +182,7 @@ class WikiCreole
      *
      * @var string
      */
-    protected $linkFormatNotExist;
+    protected $linkFormatMissing;
 
     /**
      * Format to use when creating link tags for free URLs found in the markup.
@@ -213,7 +213,7 @@ class WikiCreole
      */
     protected $optionKeys = array(
         'imgBase', 'urlBase', 'linkFormatExternal', 'linkFormatInternal',
-        'linkFormatNotExist', 'linkFormatFree'
+        'linkFormatMissing', 'linkFormatFree'
     );
 
     /**
@@ -877,9 +877,9 @@ class WikiCreole
                           '<a href="%1$s">%2$s</a>' :
                           $this->linkFormatInternal;
             } else {
-                $format = (empty($this->linkFormatNotExist)) ?
+                $format = (empty($this->linkFormatMissing)) ?
                           '<a href="%1$s" class="notcreated" title="This wiki page does not exist yet. Click to create it.">%2$s</a>' :
-                          $this->linkFormatNotExist;
+                          $this->linkFormatMissing;
             }
         }
 

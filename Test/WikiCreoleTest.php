@@ -69,36 +69,27 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
     {
     }
 
-    /**
-     * @todo Implement testReset().
-     */
     public function testReset()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        // Test that tags in $input1 do not bleed though to $output2.
+        $input1 = "=Title1=\nThis is a test of the reset method.\n\n*One\n**Two\n*Three";
+        $input2 = "This is a test of the reset method.\n\n{{{\nA block of preformatted text.\n}}}\n";
+
+        $expected1 = "<h1>Title1</h1>\n<p>This is a test of the reset method.</p>\n<ul>\n<li>One\n<ul>\n<li>Two</li>\n</ul>\n</li>\n<li>Three</li>\n</ul>\n";
+        $expected2 = "<p>This is a test of the reset method.</p>\n<pre>\nA block of preformatted text.\n</pre>";
+
+        $output1 = $this->object->parse($input1);
+        $output2 = $this->object->parse($input2);
+
+        $this->assertEquals($expected1, $output1);
+        $this->assertEquals($expected2, $output2);
     }
 
-    /**
-     * @todo Implement testPreformat().
-     */
     public function testPreformat()
     {
         $input = "Testing. \r\nAnother line.\r\n   \r\nParagraph 2\r We only want to see one &amp; and < and \" encoded\r\n";
-        $expected = "Testing. \nAnother line.\n\nParagraph 2 We only want to see one &amp; and &lt; and &quot; encoded\n";
+        $expected = "Testing. \nAnother line.\n\nParagraph 2 We only want to see one &amp; and < and \" encoded\n";
         $output = $this->object->preformat($input);
-    }
-
-    /**
-     * @todo Implement testMakeParagraphs().
-     */
-    public function testMakeParagraphs()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
     }
 
     /**
@@ -173,9 +164,6 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @todo Implement testComplicatedNestedList().
-     */
     public function testComplicatedNestedList()
     {
         $input = <<<'EoWiki'
@@ -444,9 +432,6 @@ EoHTML;
         );
     }
 
-    /**
-     *
-     */
     public function testMarkupInTables()
     {
         $input = <<<'EoWiki'
@@ -666,6 +651,14 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
+    public function testMatchMonospace()
+    {
+        $input = "Put the source code in the ##src## directory and the tests in the ##test## directory.";
+        $expected = "<p>Put the source code in the <code>src</code> directory and the tests in the <code>test</code> directory.</p>";
+        $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
+
     /**
      * @covers WikiCreoleParser::matchImages
      * @covers WikiCreoleParser::imgCallback
@@ -794,6 +787,19 @@ EoHtml;
         $input = 'Elite Technology Services\\\\1234 Main Street\\\\Springfield, PA 19999\\\\123-555-1234';
         $expected = '<p>Elite Technology Services<br />1234 Main Street<br />Springfield, PA 19999<br />123-555-1234</p>';
         $output = $this->object->parse($input);
+        $this->assertEquals($expected, $output);
+    }
+
+    public function testBlockMacro()
+    {
+        $input = "The Mazdaspeed3 is a fantastic car that is fast, corners well, has great utility due to the hatchback, and is just the right size.\n\n<<div .warning\nDisclaimer:\nI own a Mazdaspeed3 purchased at S-Plan pricing though my involvement in the Mazdaspeed Motorsports program.\nMazda has given me no other considerations or payment.\n>>\nThe best part of the car is it's low price compared to other cars in it's segment. You get a lot for the money.";
+        $expected = "<p>The Mazdaspeed3 is a fantastic car that is fast, corners well, has great utility due to the hatchback, and is just the right size.</p>\n<div class=\"warning\">\nDisclaimer:\nI own a Mazdaspeed3 purchased at S-Plan pricing though my involvement in the Mazdaspeed Motorsports program.\nMazda has given me no other considerations or payment.\n</div>\n<p>The best part of the car is it&#039;s low price compared to other cars in it&#039;s segment. You get a lot for the money.</p>";
+        $this->object->registerMacro('div', function($klass, $text) {
+            return '<div class="' . substr($klass, 1) . "\">" . $text . "</div>";
+        });
+
+        $output = $this->object->parse($input);
+
         $this->assertEquals($expected, $output);
     }
 

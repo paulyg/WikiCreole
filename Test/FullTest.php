@@ -28,19 +28,19 @@
  * IN THE SOFTWARE.
  */
 
-define('INPUT_DIR', __DIR__ . DIRECTORY_SEPARATOR);
-define('OUTPUT_DIR', INPUT_DIR);
+include '../WikiCreole.php';
 
-include INPUT_DIR . 'WikiCreole.php';
+$parser = new WikiCreole(array(
+    'urlBase' => 'http://www.example.org/wiki/',
+    'imgBase' => 'http://www.example.org/images/'
+));
 
-$parser = new WikiCreole('http://www.example.org/wiki/', 'http://www.example.org/images/');
-
-$test_input = file_get_contents(INPUT_DIR . 'CreoleTestInput.txt');
-$expected = file_get_contents(INPUT_DIR . 'CreoleTestExpected.html');
+$test_input = file_get_contents('./CreoleTestInput.txt');
+$expected = file_get_contents('./CreoleTestExpected.html');
 
 $output = $parser->parse($test_input);
 
-file_put_contents(OUTPUT_DIR . 'FinalOutput.html', $output);
+file_put_contents('./FinalOutput.html', $output);
         
 if ($output == $expected) {
     echo "All tests passed!!" . PHP_EOL;

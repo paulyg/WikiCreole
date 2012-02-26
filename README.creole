@@ -1,17 +1,17 @@
  =A Wiki Creole Parser in PHP=
  
-Creole is a standardized specification for wiki markup that attempts to be as univerasal as possible across all of the different wiki markup syntaxes out there. The 1.0 //stable// version of the specification was released in 2008. You can find out more about Creole, including syntax cheat sheets and the history behind the project at the website http://wikiceole.org.
+Creole is a standardized specification for wiki markup that attempts to be as universal as possible across all of the different wiki markup syntaxes out there. The 1.0 //stable// version of the specification was released in 2008. You can find out more about Creole, including syntax cheat sheets and the history behind the project at the website http://wikiceole.org.
 
 The intent of this library is to allow it's use in any CMS, wiki, blog, etc software that want to allow users to enter content in Creole markup instead of raw HTML. The library is implemented as a single class. An MIT license allows it's reuse in just about any type of software.
 
 ==Motivation==
-I wrote this class/library because I want to use Creole markup in a CMS I am writing. I find the syntax to be the most natural and intuitive wiki syntax out there. I began using Creole syntax inside of [[http://www.tiddlywiki.com|TiddlyWiki]]. Since I am used to it and like it I don't have the motivation to pick up the Markdown syntax that is so popular these days. There seems to be two other general purpose Creole parsers in PHP, Pear_Text_Wiki and the little known ezcDocumentCreoleWiki. At the time I wrote most of this library I only knew about Pear_Text_Wiki and decided to write my own that used PHP5 class structure and did not depend on PEAR. 
+I wrote this class/library because I want to use Creole markup in a CMS I am writing. I find the Creole syntax to be the most natural and intuitive wiki syntax out there. I began using Creole syntax inside of [[http://www.tiddlywiki.com|TiddlyWiki]]. I prefer it to Markdown (despite it's popularity these days), maybe because I am so used it it. There seems to be two other general purpose Creole parsers in PHP, Pear_Text_Wiki and the little known ezcDocumentCreoleWiki. At the time I wrote most of this library I only knew about Pear_Text_Wiki and decided to write my own that used PHP5 class structure and did not depend on PEAR. 
 
 ==Requirements==
 * PHP 5.2.4 or greater (I use [[http://php.net/manual/en/function.htmlspecialchars.php|htmlspecialchar]]'s fourth $double_encode argument to keep &gt; from turning into &amp;gt;).
 * PCRE enabled (it usually is)
 
- ==Usage=
+ ==Basic Usage=
 {{{
 include 'WikiCreole.php';
 $parser = new WikiCreole(array(
@@ -23,28 +23,48 @@ $parser = new WikiCreole(array(
 echo $parser->parse($wiki_markup);
 }}}
 
-The class requires an array of options to be passed as the first argument in it's constructor, the second argument is optional. The options array follows a 'keyname' => 'value' format. There are currently six valid key names.
- * {{{urlBase}}} A URL string that will be prepended to any //wiki links//, link tags where the target is just a page name and is not a full URL with scheme & host name. An empty string will prepend nothing. You can pass a path for relative URLs or a scheme + host name + optionally a path for aboslute URLs.
- * {{{imgBase}}} A URL string that will be prepended to any //wiki images//, image tags where the target is just a filename or path & filename, not a full URL with scheme & host name. The same rules for relative & absolute URLs as {{{urlBase}}} apply.
- * {{{linkFormatExternal}}} Specifies a format to use when creating <a> tags for link tags that have a full URL. This is most usefull if you want to apply a special class to external links so they are formatted differently. The format string will be passed to PHP's sprintf function. The format can use two numbered placeholders: %1$s - The URL, %2$s - The text part of the link. The default format is {{{<a href="%1$s" class="external">%2$s</a>}}}.
- * {{{linkFormatInternal}}} Same as {{{linkFormatExternal}}} except this format will be used for all links to other wiki/blog/CMS pages, where just the page title was supplied. The default format is {{{<a href="%1$s">%2$s</a>}}}.
- * {{{linkFormatNotExist}}} Same as {{{linkFormatInternal}}} except if you supply a list of existing pages and the page in the link tag does not yet exist, this format will be applied. This is especially usefull for specifcally styling pages that are in need of being created. The default format is {{{<a href="%1$s" class="notcreated" title="This wiki page does not exist yet. Click to create it.">%2$s</a>}}}.
- * {{{linkFormatFree}}} is applied to URLS which appear in a body of text but are not contained in a tag. Unlike the above three formats this one is a format string for preg_replace. There is also only one placeholder, $0, though it can be repeated. The default format is {{{<a href="$0" class="external">$0</a>}}}.
+==Features==
+* Parses everything in the Creole 1.0 spec.
+* Parses creole {{{additions}}} for {{{--strikethrough--}}}, {{{__underline__}}}, and {{{##monospace##}}}. See discussion below about these tags.
+* Automatic prepending of a URL or URL path to link or image "page slugs". See urlBase and imgBase option keys below.
+* Automatic "slug" conversion of text only wiki links. This removes spaces and other characters now allowed in a URL path.
+* Control over markup applied to all link tags, in case you would like to style links internal to and external to your site differently. See the linkFormat* option keys below.
+* Macros. Run a user defined function on text inside the macro markup tag <<macro>>.
 
-The second constructor argument, {{{$list_of_existing_page_slugs}}}, accepts an array containing a list of existing pages. The values of the array (keys are ignored) must be just the URL slug for a page after any illegal characters have stripped and formatting been applied (i.e. spaces to dashes). See the {{{linkCallback()}}} method and {{{$url_special_chars}}} property for more info on the URL formatting. I realize different software packages may have different rules for URL formatting/preparation. This is something that may become pluggable in the future.
+==Setting Options==
+The class requires an array of options to be passed as the first argument in it's constructor. The options array follows a 'keyname' => 'value' format. There are currently six valid key names.
+ * {{{urlBase}}} A URL string that will be prepended to any "wiki links", link tags where the target is just a page name and is not a full URL with scheme & host name. An empty string will prepend nothing. You can pass a path for absolute path URLs or a scheme + host name + optionally a path for full absolute URLs.
+ * {{{imgBase}}} A URL string that will be prepended to any //wiki images//, image tags where the target is just a filename or path & filename, not a full URL with scheme & host name. The same rules for absolute paths & full URLs as {{{urlBase}}} apply.
+ * {{{linkFormatExternal}}} Specifies a format to use when creating <a> tags for link tags that have a full URL. This is most usefull if you want to apply a special class to external links so they are formatted differently. The format string will be passed to PHP's sprintf function. The format can use two numbered placeholders: %1$s - The URL, %2$s - The text part of the link. The default format is {{{<a href="%1$s" class="external">%2$s</a>}}}. As an alternative you can pass a valid PHP callback (Closures work here if you are on PHP 5.3) and your function will be called with the URL as the first argument and the text as the second.
+ * {{{linkFormatInternal}}} Same as {{{linkFormatExternal}}} except this format will be used for all links to other wiki/blog/CMS pages, where just the page title was supplied. The default format is {{{<a href="%1$s">%2$s</a>}}}. You can also pass a PHP callback or Closure here.
+ * {{{linkFormatNotExist}}} Same as {{{linkFormatInternal}}} except if you supply a list of existing pages and the page in the link tag does not yet exist, this format will be applied. This is especially usefull for specifcally styling pages that are in need of being created. The default format is {{{<a href="%1$s" class="notcreated" title="This wiki page does not exist yet. Click to create it.">%2$s</a>}}}. You can also pass a PHP callback or Closure here.
+ * {{{linkFormatFree}}} is applied to URLS which appear in a body of text but are not contained in a tag. Unlike the above three formats this one is a format string for preg_replace. There is also only one placeholder, $0, though it can be repeated. The default format is {{{<a href="$0" class="external">$0</a>}}}. Callback and Closures don't work here yet.
+
+Any of the above options can also be set with the {{{setOption($key, $value)}}} method.
+
+A second, optional, constructor argument {{{$list_of_existing_page_slugs}}} accepts an array containing a list of existing pages. The values of the array (keys are ignored) must be just the URL slug for a page after any illegal characters have stripped and formatting been applied (i.e. spaces to dashes). See the {{{linkCallback()}}} method and {{{$url_special_chars}}} property for more info on the URL formatting. I realize different software packages may have different rules for URL formatting/preparation. This is something that may become pluggable in the future.
 
 ==Known issues==
 * Multi-line list items do not work.
 * Putting }}} inside a no wiki tag will trip up the parser.
-* Macro/placeholders are not implemented.
 
-Otherwise everything in the Creole 1.0 spec works.
+==Creole Additions==
+* I like to use strikethrough so I added {{{--strikethrough--}}} and also {{{__underline__}}} as markup formats. The rendered HTML uses a <span> tag with style applied to be compatible with HTML4/XHTML1 Strict. Note however that <s> and <u> are valid HTML5 tags. I may add a flag to toggle between these two options in the future.
+* I've also implemented the {{{##monospace##}}} addition which wraps the text in <code> tags (this was supposed to be <tt> but that was dropped in HTML5).
 
-==Extensions to Creole==
-I like to use strikethrough so I added {{{--strikethrough--}}} and also {{{__underline__}}} as markup formats. The rendered HTML uses a <span> tag with style applied to be compatible with HTML4/XHTML1 Strict. Note however that <s> and <u> are valid HTML5 tags.
+==Block Level Macros==
+You register your marco by calling the {{{registerMacro($macroName, $callback)}}} method. Again the $callback can be any valid PHP callable including a Closure.
+The parser will match a block level macro with the following sytax:
+{{{
+<<macroName arg1 arg2
+This is some paragraph text.
+>>
+}}}
+Arguments for your macro function should be separated by spaces and must appear on the first line. The "body" of the macro follows on the next lines until the closing marker >> is found. When your macro is called the arguments will be passed in the order they were presented. The body will always be last. Whatever your function returns will be placed in the markup in place of the macro tag. Inline macros are next on my development list.
 
 ==Plans for the future==
 * Fix the stuff in known issues.
-* Provide more control over the HTML classes that are added to links.
-* Possibly make the entire //wiki link// conversion process pluggable (a closure would be great here if using PHP 5.3).
-
+* Inline macros.
+* Implement a strict/non-strict mode that would toggle between HTML4/XHTML1 Strict compliance and tags allowed in HTML 5.
+* Pluggable formatting for "free link".
+* Pluggable transformation of plain text wiki links into page slugs.

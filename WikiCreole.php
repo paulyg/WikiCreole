@@ -4,7 +4,7 @@
  *
  * @package WikiCreole
  * @author Paul Garvin <paul@paulgarvin.net>
- * @copyright Copyright 2011 Paul Garvin.
+ * @copyright Copyright 2011, 2012 Paul Garvin.
  * @license MIT License
  *
  * Copyright (c) 2011 Paul Garvin <paul@paulgarvin.net>
@@ -46,7 +46,7 @@
  * All of the options are optional. If you want to use all the defaults pass in an empty
  * array for the first argument.
  *
- * The 'urlBase' will be prepended to any wiki page links. The imgBase will be prepended to
+ * The 'urlBase' will be prepended to any wiki page links. The 'imgBase' will be prepended to
  * any images. Both options will default to an empty string. If you want absolute URLs pass
  * in a string with the scheme, host, and base path.
  *
@@ -54,12 +54,14 @@
  * and 'linkFormatFree' are availible and affect how link tags are created.
  * The first three accept format strings that will be passed to PHP's sprintf function.
  * The format can use two numbered placeholders: %1$s - The URL, %2$s - The text part of the
- * link. See {@link linkCallback()} for the default patterns.
+ * link. See {@link linkCallback()} for the default patterns. These three options will also
+ * accept a PHP callback, such as a function, Closure, or Class/Object and method. The order
+ * of arguments passed to this callback will be 1) URL, 2) text.
  *
- * 'linkFormatFree' is applied to URLS which appear in a body of text but are not contained
+ * 'linkFormatFree' is applied to URLs which appear in a body of text but are not contained
  * in a tag. Unlike the above three formats this one is a format string for preg_replace.
  * There is also only one placeholder, $0, though it can be repeated. See {@link linkFreeUrls}
- * for the default pattern.
+ * for the default pattern. A callback is not allowed for this option.
  *
  * $list_of_existing_page_slugs is optional. The keys of the array must be just the URL slug
  * for a page after any illegal characters have stripped and formatting been applied (i.e.
@@ -77,7 +79,7 @@
  * @package WikiCreole
  * @link http://www.wikicreole.org/
  * @todo Make multiline list items work
- * @todo Implement Placeholder/Macro <<<x>>>
+ * @todo Implement Inline Macros
  * @todo Solve embeding }}} in nowiki tags
  */
 class WikiCreole
@@ -130,6 +132,12 @@ class WikiCreole
      * @var array
      */
     protected $headings = array();
+
+    /**
+     * Collection of all block level macros found in markup.
+     * @var array
+     */
+    protected $blockMacros = array();
 
     /**
      * Base part of URL to be used for wiki links.
@@ -186,6 +194,12 @@ class WikiCreole
      * @var string
      */
     protected $linkFormatFree;
+
+    /**
+     * Registered macros.
+     * @var array
+     */
+    protected $registeredMacros = array();
 
     /**
      * Collection of existing wiki pages, used to make non-existing page links red.
@@ -250,6 +264,19 @@ class WikiCreole
     }
 
     /**
+     * Register a macro to be called when enountered in the markup.
+     * @param string $name
+     * @param Callback $callaback
+     */
+    public function registerMacro($name, $callback)
+    {
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException("The callback associated with macro `$name` is not a valid PHP Callback.");
+        }
+        $this->registeredMacros[$name] = $callback;
+    }
+
+    /**
      * Clear out the list of block level elements that are used for parsing to make way for a new run.
      * @return void
      */
@@ -260,6 +287,7 @@ class WikiCreole
         $this->lists = array();
         $this->tables = array();
         $this->headings = array();
+        $this->blockMacros = array();
     }
 
     public function parse($markup)
@@ -268,6 +296,10 @@ class WikiCreole
 
         // These are split up into different methods to make tesing easier.
         $markup = $this->preformat($markup);
+
+        $markup = $this->matchBlockMacros($markup);
+
+        $markup = $this->escape($markup);
 
         $markup = $this->matchNowikiBlocks($markup);
 
@@ -299,10 +331,17 @@ class WikiCreole
         // Get rid of whitespace if it's the only thing on line
         $markup = preg_replace('/^[ \t]+$/m', '', $markup);
 
-        // Escape any HTML special chars now while we can
-        $markup = htmlspecialchars($markup, ENT_QUOTES, 'UTF-8', false);
-
         return $markup;
+    }
+
+    /**
+     * Escapes any HTML entities present in the markup.
+     * @param string $markup
+     * @return string
+     */
+    public function escape($markup)
+    {
+        return htmlspecialchars($markup, ENT_QUOTES, 'UTF-8', false);
     }
 
     /**
@@ -360,6 +399,8 @@ class WikiCreole
 
         $markup = $this->matchSubAndSup($markup);
 
+        $markup = $this->matchMonospace($markup);
+
         $markup = $this->linkFreeUrls($markup);
 
         $markup = $this->matchImages($markup);
@@ -396,9 +437,52 @@ class WikiCreole
         $markup = str_replace('@nwi@', '%s', $markup);
         $markup = vsprintf($markup, $this->nowikiInline);
 
+        $markup = str_replace('@blockmacro@', '%s', $markup);
+        $markup = vsprintf($markup, $this->blockMacros);
+
         $markup = str_replace('~~s~~', '%s', $markup);
 
         return $markup;
+    }
+
+    /**
+     * Find all block level macros and pass the contents to the internal callback
+     * function for replacing.
+     * @param string $markup Source markup text
+     * @return string Processed markup text
+     */
+    public function matchBlockMacros($markup)
+    {
+        return preg_replace_callback('/^<<(.*)$((?s).+)^>>/m',
+                                     array($this, 'blockMacroCallback'),
+                                     $markup);
+    }
+
+    /**
+     * Calls macro fuction and replaces macro markup with result.
+     * @param array $matches Matches from preg_replace_callback()
+     * @return string
+     */
+    public function blockMacroCallback($matches)
+    {
+        $macroLine = explode(' ', $matches[1]);
+        if (count($macroLine) > 1) {
+            $macroName = array_shift($macroLine);
+            $args = $macroLine;
+        } else {
+            $macroName = $macroLine;
+            $args = array();
+        }
+        $args[] = $matches[2];
+
+        if (!isset($this->registeredMacros[$macroName])) {
+            trigger_error("A WikiCreole macro names `$macroName` was called but not registered. Ignoring macro block.");
+            return $matches[0];
+        }
+        $callback = $this->registeredMacros[$macroName];
+
+        $this->blockMacros[] = call_user_func_array($callback, $args);
+        return "\n@blockmacro@\n";
     }
 
     /**
@@ -454,7 +538,7 @@ class WikiCreole
      */
     public function matchLists($markup)
     {
-        return preg_replace_callback('/^[\h]*(?:[*][^*#]|[#][^#*]).*$(?:\n[\h]*[*#]+.*)*/m',
+        return preg_replace_callback('/^[ \t]*(?:[*][^*#]|[#][^#*]).*$(?:\n[ \t]*[*#]+.*)*/m',
                                      array($this, 'listCallback'),
                                      $markup);
     }
@@ -468,7 +552,7 @@ class WikiCreole
     {
         $lines = array();
 
-        if (!preg_match_all('/^[\h]*([*#]+)[\h]*(.+)$/m', $matches[0], $lines, PREG_SET_ORDER)) {
+        if (!preg_match_all('/^\h*([*#]+)\h*(.*)$/m', $matches[0], $lines, PREG_SET_ORDER)) {
             return $matches[0];
         }
         $level = 0;
@@ -578,7 +662,7 @@ class WikiCreole
      */
     public function matchHeadings($markup)
     {
-        return preg_replace_callback('/^[\h]*(={1,6})(.*)$/m',
+        return preg_replace_callback('/^\h*(={1,6})(.*)$/m',
                                      array($this, 'headingCallback'),
                                      $markup);
     }
@@ -699,20 +783,13 @@ class WikiCreole
     }
 
     /**
-     * Handle replacement of subscript and superscript elements in markup.
-     * @param array $matches Matches from preg_replace_callback()
-     * @return string
+     * Find all monospace elements in markup and replace them with HTML equivalient.
+     * @param string $makeup Source markup text
+     * @return string Processed markup text
      */
-    public function subSupCallback($matches)
+    public function matchMonospace($markup)
     {
-        $char = $matches[0][0];
-        if ($char == '^') {
-            return '<sup>' . $matches[1] . '</sup>';
-        } elseif ($char = ',') {
-            return '<sub>' . $matches[1] . '</sub>';
-        } else {
-            return $matches[0];
-        }
+        return preg_replace('/(?<!~)##(.+?)##/s', '<code>$1</code>', $markup); 
     }
 
     /**
@@ -805,8 +882,13 @@ class WikiCreole
                           $this->linkFormatNotExist;
             }
         }
- 
-        return sprintf($format, $url, $text);
+
+        if (is_callable($format)) {
+            $ret = call_user_func_array($format, array($url, $text));
+        } else {
+            $ret = sprintf($format, $url, $text);
+        }
+        return $ret;
     }
 
     /**

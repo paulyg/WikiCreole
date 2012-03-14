@@ -419,8 +419,8 @@ class WikiCreole
      */
     public function recombine($markup)
     {
-        // Replace any '%s' in the markup with another marker.
-        $markup = str_replace('%s', '~~s~~', $markup);
+        // Replace any '%' in the markup with another marker.
+        $markup = str_replace('%', '~~p~~', $markup);
 
         $markup = str_replace('@nwb@', '%s', $markup);
         $markup = vsprintf($markup, $this->nowikiBlocks);
@@ -440,7 +440,7 @@ class WikiCreole
         $markup = str_replace('@blockmacro@', '%s', $markup);
         $markup = vsprintf($markup, $this->blockMacros);
 
-        $markup = str_replace('~~s~~', '%s', $markup);
+        $markup = str_replace('~~p~~', '%', $markup);
 
         return $markup;
     }

@@ -128,10 +128,6 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLists
-     * @covers WikiCreoleParser::listCallback
-     */
     public function testSimpleOrderedList()
     {
         $input = "# One\n# Two\n# Three\n# Four";
@@ -140,10 +136,6 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLists
-     * @covers WikiCreoleParser::listCallback
-     */
     public function testOrderedListFunkyWhitespace()
     {
         $input = " #One\n # Two\n #Three\n# Four";
@@ -152,10 +144,6 @@ class WikiCreoleTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLists
-     * @covers WikiCreoleParser::listCallback
-     */
     public function testSimpleNestedUl()
     {
         $input = "* Item 1\n** Item 1.1\n* Item 2";
@@ -329,10 +317,6 @@ EoHTML;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchTables
-     * @covers WikiCreoleParser::tableCallback
-     */
     public function testTableHorizontalHeader()
     {
         $input = <<<'EoWiki'
@@ -367,10 +351,6 @@ EoHTML;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchTables
-     * @covers WikiCreoleParser::tableCallback
-     */
     public function testTableVerticalHeader()
     {
         $input = <<<'EoWiki'
@@ -408,10 +388,6 @@ EoHTML;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchTables
-     * @covers WikiCreoleParser::tableCallback
-     */
     public function testTableCenterAlign()
     {
         // Remove the following lines when you implement this test.
@@ -420,10 +396,6 @@ EoHTML;
         );
     }
 
-    /**
-     * @covers WikiCreoleParser::matchTables
-     * @covers WikiCreoleParser::tableCallback
-     */
     public function testTableRightAlign()
     {
         // Remove the following lines when you implement this test.
@@ -492,10 +464,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchHeadings
-     * @covers WikiCreoleParser::headingCallback
-     */
     public function testHeadingsH3()
     {
         $input = "===This is a sub-section heading.===";
@@ -504,10 +472,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchHeadings
-     * @covers WikiCreoleParser::headingCallback
-     */
     public function testHeadingsLeadingWhitespace()
     {
         $input = " ==This is still a heading despite of the leading space.==";
@@ -524,10 +488,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchHeadings
-     * @covers WikiCreoleParser::headingCallback
-     */
     public function testHeadingsNoClosingTags()
     {
         $input = "==This should still be rendered as a heading without the trailing tags.";
@@ -671,10 +631,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchImages
-     * @covers WikiCreoleParser::imgCallback
-     */
     public function testImagesNoAlt()
     {
         $input = "Check out our 4th quarter earnings. {{earnings.png}} Look at those sales!";
@@ -695,10 +651,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLinkTags
-     * @covers WikiCreoleParser::linkCallback
-     */
     public function testWikiLinkWithText()
     {
         $input = "Learn to use our software by reading [[UserGuide|our User's Guide]].";
@@ -707,10 +659,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLinkTags
-     * @covers WikiCreoleParser::linkCallback
-     */
     public function testWikiLinkWithTextFormatting()
     {
         $input = "**Our online [[documentation]] is not so great.**";
@@ -721,8 +669,6 @@ EoHtml;
 
     /**
      * @todo Implement testWikiLinkThatDoesntExist().
-     * @covers WikiCreoleParser::matchLinkTags
-     * @covers WikiCreoleParser::linkCallback
      */
     public function testWikiLinkThatDoesntExist()
     {
@@ -732,10 +678,6 @@ EoHtml;
         );
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLinkTags
-     * @covers WikiCreoleParser::linkCallback
-     */
     public function testExternalLink()
     {
         $input = "Check out [[http://www.paulgarvin.net/php]] to learn about my other PHP projects.";
@@ -744,10 +686,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLinkTags
-     * @covers WikiCreoleParser::linkCallback
-     */
     public function testExternalLinkWithText()
     {
         $input = "Visit our [[http://www.github.com/wikicreoleparser/|Github repository]] where you can contribute to the project by forking it, improving it, and then making a pull request.";
@@ -756,10 +694,6 @@ EoHtml;
         $this->assertEquals($expected, $output);
     }
 
-    /**
-     * @covers WikiCreoleParser::matchLinkTags
-     * @covers WikiCreoleParser::linkCallback
-     */
     public function testExternalLinkWithTextFormatting()
     {
         $input = "**The [[http://www.php.net/manual/en/|PHP online documentation]] is great.**";

@@ -12,7 +12,7 @@ I began using Creole syntax inside of [[http://www.tiddlywiki.com|TiddlyWiki]], 
 * PCRE enabled (it usually is)
 
  ==Basic Usage=
-```php
+{{{
 include 'WikiCreole.php';
 $parser = new WikiCreole(array(
     'urlBase' => '/wiki/',
@@ -21,11 +21,11 @@ $parser = new WikiCreole(array(
     $list_of_existing_page_slugs
 );
 echo $parser->parse($wiki_markup);
-```
+}}}
 
 ==Features==
 * Parses everything in the Creole 1.0 spec.
-* Parses creole {{{additions}}} for {{{--strikethrough--}}}, {{{__underline__}}}, and {{{##monospace##}}}. See discussion below about these tags.
+* Parses creole //additions// for {{{--strikethrough--}}}, {{{__underline__}}}, and {{{##monospace##}}}. See discussion below about these tags.
 * Automatic prepending of a base URL or path to link or image //slug//. See {{{urlBase}}} and {{{imgBase}}} option keys below.
 * Automatic conversion of //slugs// to links to other wiki pages. This removes spaces and other characters not allowed in a URL path.
 * Control over markup applied to all link tags, in case you would like to style links internal to and external to your site differently. See the linkFormat* option keys below.

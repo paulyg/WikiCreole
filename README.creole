@@ -1,18 +1,18 @@
- =A Wiki Creole Parser in PHP=
+ =A Parser for Wiki Creole in PHP=
  
-Creole is a standardized specification for wiki markup that attempts to be as universal as possible across all of the different wiki markup syntaxes out there. The 1.0 //stable// version of the specification was released in 2008. You can find out more about Creole, including syntax cheat sheets and the history behind the project at the website http://wikiceole.org.
+Creole is a standardized specification for wiki markup syntax that attempts to be as universal as possible across all of the different wiki engines out there (WikiMedia, MoinMoin, etc). The 1.0 //stable// version of the specification was released in 2008. You can find out more about Creole, including syntax cheat sheets and the history behind the project at the website http://wikiceole.org.
 
-The intent of this library is to allow it's use in any CMS, wiki, blog, etc software that want to allow users to enter content in Creole markup instead of raw HTML. The library is implemented as a single class. An MIT license allows it's reuse in just about any type of software.
+The intent of this library is provide a general pupose Wiki Creole-to-(X)HTML converter that can be uses in any CMS, wiki, blog, etc software. The library is implemented as a single class. An MIT license allows it's reuse in just about any type of software.
 
 ==Motivation==
-I wrote this class/library because I want to use Creole markup in a CMS I am writing. I find the Creole syntax to be the most natural and intuitive wiki syntax out there. I began using Creole syntax inside of [[http://www.tiddlywiki.com|TiddlyWiki]]. I prefer it to Markdown (despite it's popularity these days), maybe because I am so used it it. There seems to be two other general purpose Creole parsers in PHP, {{{Pear_Text_Wiki}}} and the little known {{{ezcDocumentCreoleWiki}}}. At the time I wrote most of this library I only knew about {{{Pear_Text_Wiki}}} and decided to write my own that used PHP5 class structure and did not depend on PEAR. 
+I began using Creole syntax inside of [[http://www.tiddlywiki.com|TiddlyWiki]], a personal wiki written in Javascript. I find the Creole syntax to be the most natural and intuitive wiki syntax out there. I prefer it to Markdown (despite it's popularity these days), maybe just because I am so used it it. I wrote this class/library because I wanted to use Creole markup in a CMS I am (very slowly) writing. At the time the only other general purpose Wiki Creole parser written in PHP was {{{Pear_Text_Wiki}}}. I decided to write my own that used PHP5 class structure and did not depend on PEAR. Later on I found out about the little known {{{ezcDocumentCreoleWiki}}}. 
 
 ==Requirements==
-* PHP 5.2.4 or greater (I use [[http://php.net/manual/en/function.htmlspecialchars.php|htmlspecialchar]]'s fourth $double_encode argument to keep &gt; from turning into &amp;gt;).
+* PHP 5.2.4 or greater (I use [[http://php.net/manual/en/function.htmlspecialchars.php|htmlspecialchar]]'s fourth $double_encode argument to keep {{{&gt;}}} from turning into {{{&amp;gt;}}}).
 * PCRE enabled (it usually is)
 
  ==Basic Usage=
-{{{
+```php
 include 'WikiCreole.php';
 $parser = new WikiCreole(array(
     'urlBase' => '/wiki/',
@@ -21,13 +21,13 @@ $parser = new WikiCreole(array(
     $list_of_existing_page_slugs
 );
 echo $parser->parse($wiki_markup);
-}}}
+```
 
 ==Features==
 * Parses everything in the Creole 1.0 spec.
 * Parses creole {{{additions}}} for {{{--strikethrough--}}}, {{{__underline__}}}, and {{{##monospace##}}}. See discussion below about these tags.
-* Automatic prepending of a URL or URL path to link or image //page slugs//. See {{{urlBase}}} and {{{imgBase}}} option keys below.
-* Automatic //slug// conversion of text only wiki links. This removes spaces and other characters not allowed in a URL path.
+* Automatic prepending of a base URL or path to link or image //slug//. See {{{urlBase}}} and {{{imgBase}}} option keys below.
+* Automatic conversion of //slugs// to links to other wiki pages. This removes spaces and other characters not allowed in a URL path.
 * Control over markup applied to all link tags, in case you would like to style links internal to and external to your site differently. See the linkFormat* option keys below.
 * Macros. Run a user defined function on text inside the macro markup tag {{{<<macro>>}}}.
 
@@ -49,7 +49,7 @@ A second, optional, constructor argument {{{$list_of_existing_page_slugs}}} acce
 * Putting }}} inside a no wiki tag will trip up the parser.
 
 ==Creole Additions==
-* I like to use strikethrough so I added {{{--strikethrough--}}} and also {{{__underline__}}} as markup formats. The rendered HTML uses a {{{<span>}}} tag with style applied to be compatible with HTML4/XHTML1 Strict. Note however that {{{<s>}}} and {{{<u>}}} are valid HTML5 tags. I may add a flag to toggle between these two options in the future.
+* I like to use strikethrough so I added {{{--strikethrough--}}} and then also {{{__underline__}}} as markup formats. The rendered HTML uses a {{{<span>}}} tag with style applied to be compatible with HTML4/XHTML1 Strict. Note however that {{{<s>}}} and {{{<u>}}} are valid HTML5 tags. I may add a flag to toggle between these two options in the future.
 * I've also implemented the {{{##monospace##}}} addition which wraps the text in {{{<code>}}} tags (this was supposed to be {{{<tt>}}} but that was dropped in HTML5).
 
 ==Block Level Macros==
@@ -65,6 +65,7 @@ Arguments for your macro function should be separated by spaces and must appear 
 ==Plans for the future==
 * Fix the stuff in known issues.
 * Inline macros.
+* Possible automatic creation of anchors on headings (this is a common usage pattern).
 * Implement a strict/non-strict mode that would toggle between HTML4/XHTML1 Strict compliance and tags allowed in HTML 5.
 * Pluggable formatting for //free link//.
 * Pluggable transformation of plain text wiki links into page slugs.

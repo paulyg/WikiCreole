@@ -20,7 +20,7 @@ $parser = new WikiCreole(array(
     ),
     $list_of_existing_page_slugs
 );
-echo $parser->parse($wiki_markup);
+$html = $parser->parse($wiki_markup);
 }}}
 
 ==Features==
@@ -33,7 +33,7 @@ echo $parser->parse($wiki_markup);
 
 ==Setting Options==
 The class requires an array of options to be passed as the first argument in it's constructor. The options array follows a 'keyname' => 'value' format. There are currently six valid key names.
- * {{{urlBase}}}: A URL string that will be prepended to any "wiki links", link tags where the target is just a page name and is not a full URL with scheme & host name. An empty string will prepend nothing. You can pass a path for absolute path URLs or a scheme + host name + optionally a path for full absolute URLs.
+ * {{{urlBase}}}: A URL string that will be prepended to any //wiki links//, link tags where the target is just a page name and is not a full URL with scheme & host name. An empty string will prepend nothing. You can pass a path for absolute path URLs or a scheme + host name + optionally a path for full absolute URLs.
  * {{{imgBase}}}: A URL string that will be prepended to any //wiki images//, image tags where the target is just a filename or path & filename, not a full URL with scheme & host name. The same rules for absolute paths & full URLs as {{{urlBase}}} apply.
  * {{{linkFormatExternal}}}: Specifies a format to use when creating <a> tags for link tags that have a full URL. This is most usefull if you want to apply a special class to external links so they are formatted differently. The format string will be passed to PHP's sprintf function. The format can use two numbered placeholders: %1$s - The URL, %2$s - The text part of the link. The default format is {{{<a href="%1$s" class="external">%2$s</a>}}}. As an alternative you can pass a valid PHP callback (Closures work here if you are on PHP 5.3) and your function will be called with the URL as the first argument and the text as the second.
  * {{{linkFormatInternal}}} Same as {{{linkFormatExternal}}} except this format will be used for all links to other wiki/blog/CMS pages, where just the page title was supplied. The default format is {{{<a href="%1$s">%2$s</a>}}}. You can also pass a PHP callback or Closure here.
@@ -47,6 +47,7 @@ A second, optional, constructor argument {{{$list_of_existing_page_slugs}}} acce
 ==Known issues==
 * Multi-line list items do not work.
 * Putting }}} inside a no wiki tag will trip up the parser.
+* Error handling currently sucks
 
 ==Creole Additions==
 * I like to use strikethrough so I added {{{--strikethrough--}}} and then also {{{__underline__}}} as markup formats. The rendered HTML uses a {{{<span>}}} tag with style applied to be compatible with HTML4/XHTML1 Strict. Note however that {{{<s>}}} and {{{<u>}}} are valid HTML5 tags. I may add a flag to toggle between these two options in the future.
@@ -69,3 +70,4 @@ Arguments for your macro function should be separated by spaces and must appear 
 * Implement a strict/non-strict mode that would toggle between HTML4/XHTML1 Strict compliance and tags allowed in HTML 5.
 * Pluggable formatting for //free link//.
 * Pluggable transformation of plain text wiki links into page slugs.
+* Improve error handling (this is last b/c it's long). The library calls {{{vsprintf()}}} many times and if the number of elements in the array passed to {{{vsprintf()}}} does not match the number of placeholders all of the HTML gets tossed. Worse yet depending on your error level you might not know anything went wrong becuase PHP issues an E_USER_WARNING. Improving this situation is going to require some research, thought, and a decent refactor of how things work. I may have to temporarily change the error level and/or force PHP to convert errors to exceptions, both of which have to be undone when parsing is complete. **sigh**

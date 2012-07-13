@@ -2,12 +2,20 @@
 /**
  * Test script for WikiCreole using the test case at the WikiCreole website.
  *
+ * This file runs the official tests from the wikicreole.org website, located
+ * at http://www.wikicreole.org/attach/Creole1.0TestCases/creole1.0test.txt.
+ * This test is kind of an all-or-nothing, pass-or-fail situation. For that
+ * reason there is also more fine grained unit tests located in
+ * WikiCreoleTest.php.
+ *
  * @package WikiCreole
  * @author Paul Garvin <paul@paulgarvin.net>
- * @copyright Copyright 2011 Paul Garvin.
+ * @copyright Copyright 2011, 2012 Paul Garvin.
  * @license MIT License
+ * @link https://github.com/paulyg/WikiCreole Project Homepage
+ * @link http://www.wikicreole.org/ Wiki Creole Homepage 
  *
- * Copyright (c) 2011 Paul Garvin <paul@paulgarvin.net>
+ * Copyright (c) 2011, 2012 Paul Garvin <paul@paulgarvin.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to

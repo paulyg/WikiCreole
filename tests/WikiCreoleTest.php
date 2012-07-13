@@ -1,15 +1,8 @@
 <?php
 /**
- * Unit tests for the WikiCreole class.
- *
  * WikiCreole is a library to convert Creole, a common & standardized wiki markup, into HTML.
  *
- * @package WikiCreole
- * @author Paul Garvin <paul@paulgarvin.net>
- * @copyright Copyright 2011 Paul Garvin.
- * @license MIT License
- *
- * Copyright (c) 2011 Paul Garvin <paul@paulgarvin.net>
+ * Copyright (c) 2011, 2012 Paul Garvin <paul@paulgarvin.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -30,18 +23,24 @@
  * IN THE SOFTWARE.
  */
 
+if (!defined('__DIR__')) {
+    define('__DIR__', dirname(__FILE__);
+}
 require_once dirname(__DIR__) . '/WikiCreole.php';
 
 /**
- * Test class for WikiCreole.
+ * Unit tests for the WikiCreole class.
  *
- * This test class requires PHPUnit 3.4 or newer and PHP 5.3 (because of use of
- * __DIR__ constant. To run the tests simply execute
+ * This test class requires PHPUnit 3.4 or newer. To run the tests simply execute
  * <code>phpunit WikiCreoleTest</code> at a command line prompt in the same
  * directory this file is in.
  *
  * @package WikiCreole
- * @link http://www.wikicreole.org/
+ * @author Paul Garvin <paul@paulgarvin.net>
+ * @copyright Copyright 2011, 2012 Paul Garvin.
+ * @license MIT License
+ * @link https://github.com/paulyg/WikiCreole Project Homepage
+ * @link http://www.wikicreole.org/ Wiki Creole Homepage
  */
 class WikiCreoleTest extends PHPUnit_Framework_TestCase
 {

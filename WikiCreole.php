@@ -2,12 +2,7 @@
 /**
  * A library to convert Creole, a common & standardized wiki markup, into HTML.
  *
- * @package WikiCreole
- * @author Paul Garvin <paul@paulgarvin.net>
- * @copyright Copyright 2011, 2012 Paul Garvin.
- * @license MIT License
- *
- * Copyright (c) 2011 Paul Garvin <paul@paulgarvin.net>
+ * Copyright (c) 2011, 2012 Paul Garvin <paul@paulgarvin.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -40,50 +35,37 @@
  *     ),
  *     $list_of_existing_page_slugs
  * );
- * echo $parser->parse($wiki_markup);
+ * $html = $parser->parse($wiki_markup);
  * </code>
  *
- * All of the options are optional. If you want to use all the defaults pass in an empty
- * array for the first argument.
+ * The class requires an array of options to be passed as the first argument in it's
+ * constructor. The options array follows a 'keyname' => 'value' format. All of the
+ * options are optional. If you want to use all the defaults pass in an empty array
+ * for the first argument.
  *
- * The 'urlBase' will be prepended to any wiki page links. The 'imgBase' will be prepended to
- * any images. Both options will default to an empty string. If you want absolute URLs pass
- * in a string with the scheme, host, and base path.
- *
- * Four other options keys 'linkFormatExternal', 'linkFormatInternal', 'linkFormatNotExist',
- * and 'linkFormatFree' are availible and affect how link tags are created.
- * The first three accept format strings that will be passed to PHP's sprintf function.
- * The format can use two numbered placeholders: %1$s - The URL, %2$s - The text part of the
- * link. See {@link linkCallback()} for the default patterns. These three options will also
- * accept a PHP callback, such as a function, Closure, or Class/Object and method. The order
- * of arguments passed to this callback will be 1) URL, 2) text.
- *
- * 'linkFormatFree' is applied to URLs which appear in a body of text but are not contained
- * in a tag. Unlike the above three formats this one is a format string for preg_replace.
- * There is also only one placeholder, $0, though it can be repeated. See {@link linkFreeUrls}
- * for the default pattern. A callback is not allowed for this option.
- *
- * $list_of_existing_page_slugs is optional. The keys of the array must be just the URL slug
- * for a page after any illegal characters have stripped and formatting been applied (i.e.
- * spaces to dashes). See {@link linkCallback, $url_special_chars} for more info on the URL
- * formatting. If this array is provided and the page is not in the array the
- * 'linkFormatNotExist' format is used to generate the link tag. Otherwise the
- * 'linkFormatInternal' is used.
+ * See the README.creole file for discussion of the option keys and what they do.
  *
  * Known issues:
  * - Multi-line list items do not work.
  * - Putting }}} inside a no wiki tag will trip up the parser.
- * - Macro/placeholders are not implemented.
- * - Otherwise everything in the Creole 1.0 spec works.
+ * - Error handling is not robust or pretty.
  *
  * @package WikiCreole
- * @link http://www.wikicreole.org/
+ * @author Paul Garvin <paul@paulgarvin.net>
+ * @copyright Copyright 2011, 2012 Paul Garvin.
+ * @license MIT License
+ * @link https://github.com/paulyg/WikiCreole Project Homepage
+ * @link http://www.wikicreole.org/ Wiki Creole Homepage
+ *
  * @todo Make multiline list items work
  * @todo Implement Inline Macros
  * @todo Solve embeding }}} in nowiki tags
+ * @todo Improve the error handling situation
  */
 class WikiCreole
 {
+    const VERSION = '0.1.5';
+
     /**
      * Regex to recognise URLs in text.
      * Based on http://daringfireball.net/2010/07/improved_regex_for_matching_urls
@@ -100,8 +82,10 @@ class WikiCreole
      * Characters that should be replaced in URL slugs.
      * @var array
      */
-    protected $url_special_chars = array('`', '#', '%', '^', '&', '*', '=', '[', ']',
-                                         '{', '}', '|', '\\', '\'', '"', '<', '>', '/', '?');
+    protected $url_special_chars = array(
+        '`', '#', '%', '^', '&', '*', '=', '[', ']', '{',
+        '}', '|', '\\', '\'', '"', '<', '>', '/', '?'
+    );
 
     /**
      * Collection of all block type nowiki elements found in markup.

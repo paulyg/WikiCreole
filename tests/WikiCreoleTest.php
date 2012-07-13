@@ -735,16 +735,4 @@ EoHtml;
 
         $this->assertEquals($expected, $output);
     }
-
-    /**
-     * A test with all of the parsable elements in one, from the www.wikicreole.org website.
-     *
-    public function testSmokeTest()
-    {
-        $input = file_get_contents(__DIR__ . '/CreoleTestInput.txt');
-        $expected = file_get_contents(__DIR__ . '/CreoleTestExpected.html');
-        $output = $this->object->parse($input);
-        $this->assertEquals($expected, $output);
-    }   */
 }
-?>

@@ -1,0 +1,22 @@
+{
+    "name": "paulyg/wikicreole",
+    "description": "A library to convert Creole, a common & standardized wiki markup, into HTML.",
+    "type": "library",
+    "keywords": ["markup", "wiki", "creole", "parse"],
+    "homepage": "https://github.com/paulyg/WikiCreole",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Paul Garvin",
+            "email": "paul@paulgarvin.net",
+            "homepage": "http://www.paulgarvin.net/blog/"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/paulyg/WikiCreole/issues"
+    },
+    "require": {
+        "php": ">=5.2.4",
+        "ext-pcre": "*"
+    }
+}

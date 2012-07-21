@@ -24,7 +24,7 @@
  */
 
 if (!defined('__DIR__')) {
-    define('__DIR__', dirname(__FILE__);
+    define('__DIR__', dirname(__FILE__));
 }
 require_once dirname(__DIR__) . '/WikiCreole.php';
 

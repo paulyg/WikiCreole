@@ -124,6 +124,12 @@ class WikiCreole
     protected $blockMacros = array();
 
     /**
+     * Collection of debug messages from when there is an error with a recombine.
+     * @var array
+     */
+    protected $recombineErrors = array();
+
+    /**
      * Base part of URL to be used for wiki links.
      * @var string
      */
@@ -180,6 +186,13 @@ class WikiCreole
     protected $linkFormatFree;
 
     /**
+     * Flag indicating that extra debugging information should be kept.
+     *
+     * @var boolean
+     */
+    protected $debug = false;
+
+    /**
      * Registered macros.
      * @var array
      */
@@ -197,7 +210,7 @@ class WikiCreole
      */
     protected $optionKeys = array(
         'imgBase', 'urlBase', 'linkFormatExternal', 'linkFormatInternal',
-        'linkFormatMissing', 'linkFormatFree'
+        'linkFormatMissing', 'linkFormatFree', 'debug'
     );
 
     /**
@@ -266,38 +279,40 @@ class WikiCreole
      */
     public function reset()
     {
-        $this->nowikiBlocks = array();
-        $this->nowikiInline = array();
-        $this->lists = array();
-        $this->tables = array();
-        $this->headings = array();
-        $this->blockMacros = array();
+        $segments = array(
+            'nowikiBlocks',
+            'nowikiInline',
+            'lists',
+            'tables',
+            'headings',
+            'blockMacros',
+        );
+
+        foreach ($segments as $segment) {
+            $this->$segment = array();
+        }
     }
 
     public function parse($markup)
     {
         $this->reset();
+        $blocks = array(
+            'preformat',
+            'matchBlockMacros',
+            'escape',
+            'matchNowikiBlocks',
+            'matchNowikiInline',
+            'matchLists',
+            'matchTables',
+            'matchHeadings',
+            'matchHorizontalRules',
+            'makeParagraphs',
+        );
 
         // These are split up into different methods to make tesing easier.
-        $markup = $this->preformat($markup);
-
-        $markup = $this->matchBlockMacros($markup);
-
-        $markup = $this->escape($markup);
-
-        $markup = $this->matchNowikiBlocks($markup);
-
-        $markup = $this->matchNowikiInline($markup);
-
-        $markup = $this->matchLists($markup);
-        
-        $markup = $this->matchTables($markup);
-        
-        $markup = $this->matchHeadings($markup);
-        
-        $markup = $this->matchHorizontalRules($markup);
-
-        $markup = $this->makeParagraphs($markup);
+        foreach ($blocks as $block_func) {
+            $markup = $this->$block_func($markup);
+        }
 
         return $this->recombine($markup);
     }
@@ -372,24 +387,22 @@ class WikiCreole
      */
     public function parseInline($markup)
     {
+        $inlines = array(
+            'matchBold',
+            'matchItalic',
+            'matchStrikethrough',
+            'matchUnderline',
+            'matchSubAndSup',
+            'matchMonospace',
+            'linkFreeUrls',
+            'matchImages',
+            'matchLinkTags',
+        );
+
         // These are split up into different methods to make tesing easier.
-        $markup = $this->matchBold($markup);
-
-        $markup = $this->matchItalic($markup);
-
-        $markup = $this->matchStrikethrough($markup);
-
-        $markup = $this->matchUnderline($markup);
-
-        $markup = $this->matchSubAndSup($markup);
-
-        $markup = $this->matchMonospace($markup);
-
-        $markup = $this->linkFreeUrls($markup);
-
-        $markup = $this->matchImages($markup);
-
-        $markup = $this->matchLinkTags($markup);
+        foreach ($inlines as $inline_func) {
+            $markup = $this->$inline_func($markup);
+        }
 
         $markup = str_replace('\\\\', '<br />', $markup);
 
@@ -403,28 +416,39 @@ class WikiCreole
      */
     public function recombine($markup)
     {
-        // Replace any '%' in the markup with another marker.
-        $markup = str_replace('%', '~~p~~', $markup);
+        $replaced = array(
+            'nowikiBlocks' => '@nwb@',
+            'lists' => '@list@',
+            'tables' => '@table@',
+            'headings' => '@head@',
+            'nowikiInline' => '@nwi@',
+            'blockMacros' => '@blockmacro@',
+        );
+        $buffer = '';
 
-        $markup = str_replace('@nwb@', '%s', $markup);
-        $markup = vsprintf($markup, $this->nowikiBlocks);
-
-        $markup = str_replace('@list@', '%s', $markup);
-        $markup = vsprintf($markup, $this->lists);
-
-        $markup = str_replace('@table@', '%s', $markup);
-        $markup = vsprintf($markup, $this->tables);
-
-        $markup = str_replace('@head@', '%s', $markup);
-        $markup = vsprintf($markup, $this->headings);
-
-        $markup = str_replace('@nwi@', '%s', $markup);
-        $markup = vsprintf($markup, $this->nowikiInline);
-
-        $markup = str_replace('@blockmacro@', '%s', $markup);
-        $markup = vsprintf($markup, $this->blockMacros);
+        foreach ($replaced as $what => $marker) {
+            // Replace any '%' in the markup with another marker.
+            $markup = str_replace('%', '~~p~~', $markup);
+            $buffer = $markup;
+            $markup = str_replace($marker, '%s', $markup);
+            $markup = vsprintf($markup, $this->$what);
+            if (!$markup) {
+                $markup = $buffer;
+                if ($this->debug) {
+                    $this->recombineErrors[$what] = $this->$what;
+                }
+            }
+        }
 
         $markup = str_replace('~~p~~', '%', $markup);
+
+        if ($this->debug) {
+            foreach ($this->recombineErrors as $section => $data) {
+                $markup .= "\n\n" . "<pre>Error recombining '$section'. "
+                        .  "Matched elements are shown below for debuging purposes.\n"
+                        .  print_r($data, true) . "</pre>";
+            }
+        }
 
         return $markup;
     }
@@ -854,6 +878,7 @@ class WikiCreole
             $url = htmlspecialchars_decode($url, ENT_QUOTES);
             $url = str_replace(' ', '-', $url);
             $url = str_replace($this->url_special_chars, '', $url);
+            $url = strtolower($url);
             $page = $url;
             $url = $this->urlBase . $page;
             if ($this->wikiPageExists($page)) {

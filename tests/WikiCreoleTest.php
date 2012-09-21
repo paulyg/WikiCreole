@@ -239,7 +239,7 @@ EoWiki;
 <li>session settings</li>
 <li>session_start()</li>
 <li>ob_start()</li>
-<li>Create <a href="/wiki/Tm_AppController">Tm_AppController</a> object with $db_config</li>
+<li>Create <a href="/wiki/tm_appcontroller">Tm_AppController</a> object with $db_config</li>
 <li>Connect to database &amp; get options (Tm_Config object), allow to tm_bail</li>
 <li>Create Router object - do before checking auth since Auth may need to set error controller in router.</li>
 <li>Create View object</li>
@@ -434,13 +434,13 @@ EoWiki;
 </tr>
 <tr>
 <td>gallery2</td>
-<td><a href="/wiki/Gallery">Menalto Gallery</a></td>
+<td><a href="/wiki/gallery">Menalto Gallery</a></td>
 <td>2.3.3</td>
 <td><em>3.0</em></td>
 </tr>
 <tr>
 <td>kitchen</td>
-<td><a href="/wiki/Wordpress">Wordpress</a></td>
+<td><a href="/wiki/wordpress">Wordpress</a></td>
 <td>3.0.5</td>
 <td>3.0.5</td>
 </tr>
@@ -653,7 +653,7 @@ EoHtml;
     public function testWikiLinkWithText()
     {
         $input = "Learn to use our software by reading [[UserGuide|our User's Guide]].";
-        $expected = "<p>Learn to use our software by reading <a href=\"/wiki/UserGuide\">our User&#039;s Guide</a>.</p>";
+        $expected = "<p>Learn to use our software by reading <a href=\"/wiki/userguide\">our User&#039;s Guide</a>.</p>";
         $output = $this->object->parse($input);
         $this->assertEquals($expected, $output);
     }
